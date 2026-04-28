@@ -1,5 +1,7 @@
 // assets/js/nav-auth-toggle.js
 
+let cartHandlerAttached = false; // 🔥 guard
+
 function updateNavAuth() {
   const authLink = document.getElementById("navAuthLink");
   const userItem = document.getElementById("navUserItem");
@@ -32,7 +34,7 @@ function updateNavAuth() {
       localStorage.removeItem("lc_token");
       localStorage.removeItem("lc_user");
 
-      updateNavAuth(); // update instantly
+      window.dispatchEvent(new Event("lc:auth-changed"));
       window.location.href = "login.html";
     };
 
@@ -45,13 +47,48 @@ function updateNavAuth() {
   }
 }
 
+//
+// ✅ Attach cart handler ONLY ONCE
+//
+window.addEventListener("lc:navbar-loaded", () => {
+  if (cartHandlerAttached) return; // 🔥 prevent duplicate
+
+  const cartBtn = document.getElementById("navCartBtn");
+  if (!cartBtn) return;
+
+  cartBtn.addEventListener("click", (e) => {
+    const user = getCurrentUser();
+
+    if (!user) {
+      e.preventDefault();
+
+      showToast("Please login to view cart", "error");
+
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 800);
+    }
+  });
+
+  cartHandlerAttached = true;
+});
+
+//
 // Run after navbar loads
+//
 window.addEventListener("lc:navbar-loaded", updateNavAuth);
 
-// Optional: run on page load (fallback)
+//
+// Fallback
+//
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(updateNavAuth, 100);
 });
 
-// 🔥 IMPORTANT: listen for login event
-window.addEventListener("lc:auth-changed", updateNavAuth);
+//
+// Listen for auth changes
+//
+window.addEventListener("lc:auth-changed", () => {
+  updateNavAuth();
+  setTimeout(updateNavCartCount, 50);
+});
