@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Dashboard — LearnChemistry.in</title>
+  <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+<link href="assets/css/style.css" rel="stylesheet" />
+
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <div id="lcNavbar"></div>
+
+    <main class="container flex-grow-1 py-4">
+        <div class="d-flex justify-content-between align-items-end flex-wrap gap-2 mb-3">
+            <div>
+                <h1 class="h3 fw-bold mb-1">User Dashboard</h1>
+                <div class="text-muted">Signed in as <span class="fw-semibold" id="userEmail">—</span></div>
+            </div>
+            <a href="shop.html" class="btn btn-outline-primary">Buy more notes</a>
+        </div>
+
+        <div id="dashMsg"></div>
+
+        <div class="row g-4">
+            <aside class="col-lg-3">
+                <div class="card note-card p-3 sidebar">
+                    <h6 class="text-uppercase text-muted mb-2">Menu</h6>
+                    <div class="list-group">
+                        <a class="list-group-item list-group-item-action active" data-bs-toggle="tab" href="#tabNotes">My Notes</a>
+                        <a class="list-group-item list-group-item-action" data-bs-toggle="tab" href="#tabOrders">Orders</a>
+                    </div>
+                    <div class="text-muted small mt-3">Backend mapping:</div>
+                    <div class="small"><code>GET /my-orders</code></div>
+                    <div class="small"><code>GET /download/:id</code></div>
+                </div>
+            </aside>
+
+            <section class="col-lg-9">
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="tabNotes">
+                        <div class="card note-card p-4">
+                            <h5 class="mb-3">My Purchases</h5>
+                            <div id="myNotes"></div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="tabOrders">
+                        <div class="card note-card p-4">
+                            <h5 class="mb-3">Order History</h5>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead><tr><th>Order ID</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th></tr></thead>
+                                    <tbody id="orderTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div id="lcFooter"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/cart.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+</body>
+</html>
