@@ -1,58 +1,73 @@
 // assets/js/product.js
+// Loads product from backend if not found in LC_PRODUCTS
 
-document.addEventListener('DOMContentLoaded', () => {
+function deriveExamCategory(text) {
+  const t = (text || "").toLowerCase();
+  if (t.includes("neet")) return { exam: "NEET", category: "NEET" };
+  if (t.includes("jee")) return { exam: "JEE", category: "JEE" };
+  return { exam: "Class 11/12", category: "Class 11/12" };
+}
 
-  const id = parseInt(getQueryParam('id') || '1', 10);
-  const p = (window.LC_PRODUCTS || []).find(x => x.id === id);
-  const root = qs('#productRoot');
+async function fetchCourse(id) {
+  const API = "http://localhost:8080";
+  const res = await fetch(`${API}/v1/courses/${id}`);
+  if (!res.ok) throw new Error("Not found");
+  return await res.json();
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const root = qs("#productRoot");
+  const id = Number(getQueryParam("id"));
+
+  let p = (window.LC_PRODUCTS || []).find(x => x.id === id);
 
   if (!p) {
-    root.innerHTML = `<div class="alert alert-danger">Product not found.</div>`;
-    return;
+    try {
+      const c = await fetchCourse(id);
+      const meta = deriveExamCategory(`${c.title} ${c.slug}`);
+      p = {
+        id: c.id,
+        title: c.title,
+        exam: meta.exam,
+        category: meta.category,
+        short: c.description || "",
+        description: c.description || "",
+        price: Math.round((c.pricePaise || 0) / 100),
+        pages: 0,
+        chapters: []
+      };
+
+      // ✅ inject into LC_PRODUCTS
+      window.LC_PRODUCTS = window.LC_PRODUCTS || [];
+      window.LC_PRODUCTS.push(p);
+    } catch {
+      root.innerHTML = `<div class="alert alert-danger">Product not found.</div>`;
+      return;
+    }
   }
 
-  // ===== Render Product =====
-  qs('#pTitle').textContent = p.title;
-  qs('#pMeta').textContent = `${p.exam} • ${p.category}`;
-  qs('#pPrice').textContent = formatINR(p.price);
-  qs('#pShort').textContent = p.short;
-  qs('#pDesc').textContent = p.description;
-  qs('#pPages').textContent = `${p.pages} pages`;
-  qs('#pChaptersCount').textContent = `${p.chapters.length} chapters`;
-  qs('#chapterList').innerHTML =
-    p.chapters.map(c => `<li class="list-group-item">${c}</li>`).join('');
+  qs("#pTitle").textContent = p.title;
+  qs("#pMeta").textContent = `${p.exam} • ${p.category}`;
+  qs("#pPrice").textContent = formatINR(p.price);
+  qs("#pShort").textContent = p.short;
+  qs("#pDesc").textContent = p.description;
+  qs("#pPages").textContent = `—`;
+  qs("#pChaptersCount").textContent = `—`;
+  qs("#chapterList").innerHTML = `<li class="list-group-item text-muted">Details coming soon</li>`;
 
-  // ===== Helper: Require Login =====
   function requireLogin() {
     if (!getCurrentUser()) {
-      showToast("Please login to continue", "error");
-
-      setTimeout(() => {
-        window.location.href = "login.html";
-      }, 800);
-
+      showToast("Please login first");
+      setTimeout(() => location.href = "login.html", 800);
       return false;
     }
     return true;
   }
 
-  // ===== Add to Cart =====
-  qs('#btnAddToCart').addEventListener('click', () => {
+  qs("#btnAddToCart").onclick = () => requireLogin() && addToCart(p.id, 1);
+  qs("#btnBuyNow").onclick = () => {
     if (!requireLogin()) return;
-
-    addToCart(p.id, 1); // toast handled inside cart.js
-  });
-
-  // ===== Buy Now =====
-  qs('#btnBuyNow').addEventListener('click', () => {
-    if (!requireLogin()) return;
-
     addToCart(p.id, 1);
-
-    showToast("Redirecting to cart...");
-    setTimeout(() => {
-      window.location.href = 'cart.html'; // better than checkout for now
-    }, 600);
-  });
-
+    location.href = "cart.html";
+  };
 });
