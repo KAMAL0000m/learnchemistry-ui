@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Checkout — LearnChemistry.in</title>
-  <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
-<link href="assets/css/style.css" rel="stylesheet" />
-
+    <title>Checkout — LearnChemistry.in</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="assets/css/style.css" rel="stylesheet" />
 </head>
+
 <body class="d-flex flex-column min-vh-100">
     <div id="lcNavbar"></div>
 
@@ -18,18 +18,27 @@
             <section class="col-lg-7">
                 <div class="card note-card p-4">
                     <h5 class="mb-3">User Details</h5>
+
                     <div id="checkoutMsg"></div>
+
                     <form>
                         <div class="mb-3">
                             <label class="form-label">Name</label>
                             <input class="form-control" id="inputName" placeholder="Your name" />
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Email</label>
                             <input class="form-control" id="inputEmail" placeholder="you@example.com" />
                         </div>
-                        <button class="btn btn-danger btn-lg" id="btnPay"><i class="bi bi-credit-card"></i> Pay with Razorpay</button>
-                        <div class="text-muted small mt-2">UI placeholder — integrate backend: <code>POST /create-order</code> and Razorpay checkout.</div>
+
+                        <button class="btn btn-success btn-lg" id="btnPay" type="button">
+                            <i class="bi bi-check2-circle"></i> Checkout (Free Purchase MVP)
+                        </button>
+
+                        <div class="text-muted small mt-2">
+                            Backend integration: <code>POST /v1/orders/free</code> (JWT protected). Razorpay will be integrated later.
+                        </div>
                     </form>
                 </div>
             </section>
@@ -48,10 +57,20 @@
     <div id="lcFooter"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Keep data.js if other pages still rely on it; not required for checkout -->
     <script src="assets/js/data.js"></script>
+
+    <!-- main.js provides qs/qsa/getQueryParam + loads navbar/footer -->
     <script src="assets/js/main.js"></script>
+
+    <!-- navbar auth toggle -->
     <script src="assets/js/nav-auth-toggle.js"></script>
+
+    <!-- cart.js provides cartItemsDetailed/cartTotals/getCart/setCart -->
     <script src="assets/js/cart.js"></script>
+
+    <!-- backend-integrated checkout -->
     <script src="assets/js/checkout.js"></script>
 </body>
 </html>

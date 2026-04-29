@@ -1,60 +1,119 @@
 // assets/js/admin.js
-// UI only: product create + order view (localStorage)
+// Real Admin backend integration
 
-document.addEventListener('DOMContentLoaded', ()=>{
-  const addForm = qs('#adminAddProductForm');
-  const ordersBody = qs('#adminOrdersBody');
-  const msg = qs('#adminMsg');
+document.addEventListener("DOMContentLoaded", () => {
+  const form = qs("#adminAddProductForm");
+  const msg = qs("#adminMsg");
+  const ordersBody = qs("#adminOrdersBody");
 
-  function renderOrders(){
-    const orders = JSON.parse(localStorage.getItem('lc_orders') || '[]');
-    if(orders.length===0){
-      ordersBody.innerHTML = `<tr><td colspan="5" class="text-muted">No orders available (simulate a checkout first).</td></tr>`;
-      return;
-    }
-    ordersBody.innerHTML = orders.map(o=>{
-      const dt = new Date(o.createdAt);
-      return `
-        <tr>
-          <td>${o.id}</td>
-          <td>${o.name || '-'}</td>
-          <td>${o.email || '-'}</td>
-          <td>${formatINR(o.total)}</td>
-          <td>${dt.toLocaleString()}</td>
-        </tr>
-      `;
-    }).join('');
+  const API = "http://localhost:8080";
+  const token = localStorage.getItem("lc_token");
+
+  if (!token) {
+    msg.innerHTML = `<div class="alert alert-danger">Admin login required.</div>`;
+    setTimeout(() => window.location.href = "login.html", 600);
+    return;
   }
 
-  addForm?.addEventListener('submit', (e)=>{
+  loadOrders();
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    // UI-only: pushes to in-memory dataset (refresh resets)
-    const title = qs('#adminTitle').value.trim();
-    const exam = qs('#adminExam').value;
-    const price = parseInt(qs('#adminPrice').value||'0',10);
-    if(!title || !price){
-      msg.innerHTML = `<div class="alert alert-warning">Please enter title and price.</div>`;
+
+    const pdf = qs("#adminPdfFile").files[0];
+    const title = qs("#adminTitle").value.trim();
+    const exam = qs("#adminExam").value;
+    const priceInr = parseInt(qs("#adminPrice").value || "0", 10);
+    const description = qs("#adminDesc").value.trim();
+
+    if (!title || !pdf) {
+      msg.innerHTML = `<div class="alert alert-warning">Title and PDF required.</div>`;
       return;
     }
 
-    const maxId = Math.max(...(window.LC_PRODUCTS||[]).map(p=>p.id), 0);
-    window.LC_PRODUCTS.push({
-      id: maxId+1,
-      slug: title.toLowerCase().replace(/[^a-z0-9]+/g,'-'),
-      title,
-      exam,
-      category: exam,
-      price,
-      short: 'Newly added product (UI only).',
-      description: 'Replace this description from backend.',
-      pages: 100,
-      chapters: ['Chapter 1','Chapter 2'],
-      badge: 'Draft'
-    });
+    msg.innerHTML = `<div class="alert alert-info">Creating course...</div>`;
 
-    msg.innerHTML = `<div class="alert alert-success">Product added (UI-only). Integrate backend: POST /products + upload PDF.</div>`;
-    addForm.reset();
+    try {
+      // 1️⃣ Create course
+      const cRes = await fetch(`${API}/v1/admin/courses`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ title, exam, priceInr, description })
+      });
+
+      const cData = await cRes.json();
+      if (!cRes.ok) throw new Error(cData.error || "Course creation failed");
+
+      const courseId = cData.courseId;
+
+      msg.innerHTML = `<div class="alert alert-info">Uploading PDF...</div>`;
+
+      // 2️⃣ Upload PDF
+      const pRes = await fetch(`${API}/v1/admin/course-pdf/${courseId}`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/pdf",
+          "X-Filename": pdf.name
+        },
+        body: pdf
+      });
+
+      const pData = await pRes.json();
+      if (!pRes.ok) throw new Error(pData.error || "PDF upload failed");
+
+      msg.innerHTML = `
+        <div class="alert alert-success">
+          ✅ Course created & PDF uploaded<br/>
+          <small>courseId=${courseId}</small>
+        </div>
+      `;
+
+      form.reset();
+      loadOrders();
+
+    } catch (err) {
+      msg.innerHTML = `<div class="alert alert-danger">${escapeHtml(err.message)}</div>`;
+    }
   });
 
-  renderOrders();
+  async function loadOrders() {
+    ordersBody.innerHTML = `<tr><td colspan="5">Loading...</td></tr>`;
+
+    try {
+      const res = await fetch(`${API}/v1/admin/orders`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load orders");
+
+      if (!data.items.length) {
+        ordersBody.innerHTML = `<tr><td colspan="5" class="text-muted">No orders found.</td></tr>`;
+        return;
+      }
+
+      ordersBody.innerHTML = data.items.map(o => `
+        <tr>
+          <td>${o.orderId}</td>
+          <td>${o.email}</td>
+          <td>${formatINR(Math.round(o.totalPaise / 100))}</td>
+          <td><span class="badge text-bg-success">${o.status}</span></td>
+          <td>${o.createdAt}</td>
+        </tr>
+      `).join("");
+
+    } catch (err) {
+      ordersBody.innerHTML = `<tr><td colspan="5" class="text-danger">${escapeHtml(err.message)}</td></tr>`;
+    }
+  }
 });
+
+function escapeHtml(s) {
+  return String(s || "").replace(/[&<>"']/g, m => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+  }[m]));
+}

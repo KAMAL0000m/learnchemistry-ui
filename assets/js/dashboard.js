@@ -1,69 +1,131 @@
 // assets/js/dashboard.js
+// Fetches purchased courses from backend: GET /v1/me/courses (JWT protected)
 
-document.addEventListener('DOMContentLoaded', ()=>{
+document.addEventListener('DOMContentLoaded', async () => {
   const user = JSON.parse(localStorage.getItem('lc_user') || 'null');
   qs('#userEmail').textContent = user?.email || 'guest@learnchemistry.in';
 
-  const orders = JSON.parse(localStorage.getItem('lc_orders') || '[]');
-  if(getQueryParam('paid')==='1'){
-    qs('#dashMsg').innerHTML = `<div class="alert alert-success">Payment successful (simulated). Your notes are ready.</div>`;
+  const token = localStorage.getItem('lc_token');
+  if (!token) {
+    // Not logged in -> go to login
+    window.location.href = 'login.html';
+    return;
   }
 
-  const purchased = new Map();
-  orders.forEach(o=>{
-    (o.items||[]).forEach(it=>purchased.set(it.id, it));
-  });
+  // Show message after checkout redirect
+  if (getQueryParam('paid') === '1') {
+    const orderId = getQueryParam('orderId');
+    qs('#dashMsg').innerHTML =
+      `<div class="alert alert-success">
+        Purchase successful. Your notes are ready.
+        ${orderId ? `<div class="small mt-1 text-muted">Order ID: ${escapeHtml(orderId)}</div>` : ``}
+      </div>`;
+  } else {
+    qs('#dashMsg').innerHTML = '';
+  }
 
-  const byId = new Map((window.LC_PRODUCTS||[]).map(p=>[p.id,p]));
-  const notes = Array.from(purchased.keys()).map(id=>byId.get(id)).filter(Boolean);
+  // Load purchases from backend
+  await loadMyPurchasedCourses(token);
 
+  // Orders tab (backend endpoint not implemented yet)
+  renderOrdersPlaceholder();
+});
+
+async function loadMyPurchasedCourses(token) {
   const notesRoot = qs('#myNotes');
-  if(notes.length===0){
-    notesRoot.innerHTML = `<div class="alert alert-info">No purchases yet. <a href="shop.html">Browse notes</a>.</div>`;
-  }else{
-    notesRoot.innerHTML = notes.map(p=>`
-      <div class="card note-card mb-3">
-        <div class="card-body d-flex flex-column flex-md-row gap-3 align-items-md-center">
-          <img src="assets/images/note-cover.svg" class="rounded" style="width:92px;height:92px;object-fit:cover" alt="cover" />
-          <div class="flex-grow-1">
-            <div class="d-flex justify-content-between gap-2">
-              <div>
-                <h5 class="mb-1">${p.title}</h5>
-                <div class="text-muted small">${p.exam} • ${p.category}</div>
-              </div>
-              <span class="badge text-bg-success align-self-start">Purchased</span>
-            </div>
-            <div class="text-muted small">Download link will map to: GET /download/${p.id}</div>
-          </div>
-          <button class="btn btn-success" data-download="${p.id}"><i class="bi bi-download"></i> Download</button>
-        </div>
-      </div>
-    `).join('');
+  const API_BASE = (window.LC_API_BASE || 'http://localhost:8080');
 
-    qsa('[data-download]').forEach(btn=>btn.addEventListener('click', ()=>{
-      const id = btn.dataset.download;
-      // UI-only placeholder
-      alert(`Download simulated. Backend should call: GET /download/${id}`);
-    }));
-  }
+  notesRoot.innerHTML = `<div class="alert alert-info">Loading your purchases...</div>`;
 
-  // Orders table
-  const tableRoot = qs('#orderTableBody');
-  if(orders.length===0){
-    tableRoot.innerHTML = `<tr><td colspan="5" class="text-muted">No orders found.</td></tr>`;
-  }else{
-    tableRoot.innerHTML = orders.map(o=>{
-      const dt = new Date(o.createdAt);
-      const items = (o.items||[]).map(x=>x.title).join(', ');
+  try {
+    const res = await fetch(`${API_BASE}/v1/me/courses`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      const msg = data.error || `Failed to load purchases (HTTP ${res.status})`;
+
+      notesRoot.innerHTML = `<div class="alert alert-danger">${escapeHtml(msg)}</div>`;
+
+      // Token invalid/expired -> login again
+      if (res.status === 401) {
+        setTimeout(() => window.location.href = 'login.html', 700);
+      }
+      return;
+    }
+
+    const items = data.items || [];
+    if (!items.length) {
+      notesRoot.innerHTML =
+        `<div class="alert alert-info">
+          No purchases yet. shop.htmlBrowse notes</a>.
+        </div>`;
+      return;
+    }
+
+    // Render cards
+    notesRoot.innerHTML = items.map(c => {
+      const title = c.title || '';
+      const desc = c.description || '';
+      const priceInr = Math.round((c.pricePaise || 0) / 100);
+      const enrolledAt = c.enrolledAt || '';
+
       return `
-        <tr>
-          <td>${o.id}</td>
-          <td>${dt.toLocaleString()}</td>
-          <td class="text-truncate" style="max-width:360px;">${items}</td>
-          <td>${formatINR(o.total)}</td>
-          <td><span class="badge text-bg-success">${o.status}</span></td>
-        </tr>
+        <div class="card note-card mb-3">
+          <div class="card-body d-flex flex-column flex-md-row gap-3 align-items-md-center">
+            <img src="assets/images/note-cover.svg" class="rounded"
+                 style="width:92px;height:92px;object-fit:cover" alt="cover" />
+            <div class="flex-grow-1">
+              <div class="d-flex justify-content-between gap-2">
+                <div>
+                  <h5 class="mb-1">${escapeHtml(title)}</h5>
+                  <div class="text-muted small">
+                    Price: ${escapeHtml(formatINR(priceInr))}${enrolledAt ? ` • Enrolled: ${escapeHtml(enrolledAt)}` : ``}
+                  </div>
+                </div>
+                <span class="badge text-bg-success align-self-start">Purchased</span>
+              </div>
+              <div class="text-muted small mt-1">${escapeHtml(desc.slice(0, 140))}${desc.length > 140 ? '...' : ''}</div>
+              <div class="text-muted small mt-2">Download mapping later: <code>GET /v1/download/${escapeHtml(String(c.id))}</code></div>
+            </div>
+            <button class="btn btn-success" data-download="${escapeHtml(String(c.id))}">
+              <i class="bi bi-download"></i> Download
+            </button>
+          </div>
+        </div>
       `;
     }).join('');
+
+    // Download button (placeholder)
+    qsa('[data-download]').forEach(btn => btn.addEventListener('click', () => {
+      const id = btn.dataset.download;
+      alert(`Download placeholder. Backend endpoint later: GET /v1/download/${id}`);
+    }));
+
+  } catch (err) {
+    console.error(err);
+    notesRoot.innerHTML = `<div class="alert alert-danger">Network error: ${escapeHtml(err.message)}</div>`;
   }
-});
+}
+
+function renderOrdersPlaceholder() {
+  const tableRoot = qs('#orderTableBody');
+  tableRoot.innerHTML =
+    `<tr>
+      <td colspan="5" class="text-muted">
+        Order History will be loaded from backend later (GET /v1/orders).
+      </td>
+    </tr>`;
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+  }[m]));
+}
