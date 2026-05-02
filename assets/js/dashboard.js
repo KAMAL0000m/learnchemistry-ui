@@ -103,9 +103,57 @@ async function loadMyPurchasedCourses(token) {
     }).join('');
 
     // Download button (placeholder)
-    qsa('[data-download]').forEach(btn => btn.addEventListener('click', () => {
-      const id = btn.dataset.download;
-      alert(`Download placeholder. Backend endpoint later: GET /v1/download/${id}`);
+    qsa('[data-download]').forEach(btn => btn.addEventListener('click', async () => {
+      const courseId = btn.dataset.download;
+      const token = localStorage.getItem('lc_token');
+      const API_BASE = (window.LC_API_BASE || 'http://localhost:8080');
+
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Downloading`;
+
+      try {
+        const res = await fetch(`${API_BASE}/v1/download/${encodeURIComponent(courseId)}`, {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          alert(`Download failed (HTTP ${res.status}). ${text}`);
+          btn.disabled = false;
+          btn.innerHTML = `<i class="bi bi-download"></i> Download`;
+          return;
+        }
+
+        // get filename from Content-Disposition if present
+        const cd = res.headers.get('Content-Disposition') || '';
+        let filename = `course_${courseId}.pdf`;
+        const match = cd.match(/filename=\"?([^\";]+)\"?/i);
+        if (match && match[1]) filename = match[1];
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        window.URL.revokeObjectURL(url);
+
+      } catch (e) {
+        alert(`Network error: ${e.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="bi bi-download"></i> Download`;
+      }
     }));
 
   } catch (err) {
