@@ -1,46 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>LearnChemistry.in — Best Notes for NEET/JEE</title>
-  <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
-<link href="assets/css/style.css" rel="stylesheet" />
+    <title>LearnChemistry.in — Best Notes for NEET/JEE</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="assets/css/style.css" rel="stylesheet" />
 </head>
+
 <body class="d-flex flex-column min-vh-100">
     <div id="lcNavbar"></div>
 
+    <!-- ================= HERO ================= -->
     <header class="hero py-5">
         <div class="container py-4">
             <div class="row align-items-center g-4">
                 <div class="col-lg-7">
                     <span class="badge bg-warning text-dark mb-3">Trusted by students</span>
                     <h1 class="display-5 fw-bold">Best Chemistry Notes for NEET / JEE</h1>
-                    <p class="lead text-white-50 mt-3">Premium, exam-focused PDFs — chapter-wise coverage, shortcuts, and quick revision sheets.</p>
+                    <p class="lead text-white-50 mt-3">
+                        Premium, exam‑focused PDFs — chapter‑wise coverage, shortcuts, and quick revision sheets.
+                    </p>
+
                     <div class="d-flex flex-wrap gap-2 mt-4">
-                        <a href="shop.html" class="btn btn-warning btn-lg"><i class="bi bi-bag"></i> View Notes</a>
-                        <a href="shop.html" class="btn btn-outline-light btn-lg"><i class="bi bi-lightning"></i> Buy Now</a>
-                    </div>
-                    <div class="d-flex flex-wrap gap-3 mt-4 text-white-50">
-                        <div><i class="bi bi-check-circle"></i> Instant access after payment</div>
-                        <div><i class="bi bi-check-circle"></i> NEET/JEE aligned</div>
-                        <div><i class="bi bi-check-circle"></i> Mobile friendly PDFs</div>
+                        <a href="shop.html" class="btn btn-warning btn-lg">
+                            <i class="bi bi-bag"></i> View Notes
+                        </a>
+                        <a href="shop.html" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-lightning"></i> Buy Now
+                        </a>
                     </div>
                 </div>
+
+                <!-- ✅ POPULAR PACK (dynamic) -->
                 <div class="col-lg-5">
                     <div class="card note-card">
-                        <img src="assets/images/note-cover.svg" alt="Notes" class="note-thumb" />
+                        <img src="assets/images/note-cover.svg" class="note-thumb" alt="cover" />
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <div class="text-muted small">Popular pack</div>
-                                    <div class="fw-bold">Organic Chemistry – NEET</div>
+                                    <div class="fw-bold" id="popularTitle">Loading…</div>
                                 </div>
-                                <div class="price">₹299</div>
+                                <div class="price" id="popularPrice">—</div>
                             </div>
-                            <a href="product.html?id=1" class="btn btn-primary w-100 mt-3">See Details</a>
+                            <a id="popularLink" class="btn btn-primary w-100 mt-3">See Details</a>
                         </div>
                     </div>
                 </div>
@@ -48,82 +54,31 @@
         </div>
     </header>
 
+    <!-- ================= FEATURED ================= -->
     <main class="flex-grow-1">
         <section class="container py-5">
             <div class="d-flex justify-content-between align-items-end mb-3">
                 <div>
                     <h2 class="h3 fw-bold mb-1">Featured Notes</h2>
-                    <div class="text-muted">Hand-picked best sellers for quick results.</div>
+                    <div class="text-muted">Hand‑picked best sellers for quick results.</div>
                 </div>
                 <a href="shop.html" class="btn btn-outline-primary">View all</a>
             </div>
+
+            <!-- ✅ FILLED FROM BACKEND -->
             <div class="row g-4" id="featuredGrid"></div>
-        </section>
-
-        <section class="container pb-5">
-            <h2 class="h3 fw-bold mb-3">Categories</h2>
-            <div class="row g-3">
-                <div class="col-md-4"><a class="card note-card p-4 text-decoration-none" href="shop.html"><h5 class="mb-1">NEET</h5><div class="text-muted">Concept + NCERT focused</div></a></div>
-                <div class="col-md-4"><a class="card note-card p-4 text-decoration-none" href="shop.html"><h5 class="mb-1">JEE</h5><div class="text-muted">Formulas + problem approach</div></a></div>
-                <div class="col-md-4"><a class="card note-card p-4 text-decoration-none" href="shop.html"><h5 class="mb-1">Class 11/12</h5><div class="text-muted">Boards + entrances</div></a></div>
-            </div>
-        </section>
-
-        <section class="container pb-5">
-            <h2 class="h3 fw-bold mb-3">Testimonials</h2>
-            <div class="row g-4">
-                <div class="col-md-4"><div class="card note-card p-4"><div class="fw-semibold">“Super concise and high-yield.”</div><div class="text-muted mt-2">— NEET student</div></div></div>
-                <div class="col-md-4"><div class="card note-card p-4"><div class="fw-semibold">“Helped me revise in 2 days.”</div><div class="text-muted mt-2">— JEE aspirant</div></div></div>
-                <div class="col-md-4"><div class="card note-card p-4"><div class="fw-semibold">“Tables & shortcuts are awesome.”</div><div class="text-muted mt-2">— Class 12 student</div></div></div>
-            </div>
-        </section>
-
-        <section class="container pb-5">
-            <div class="card note-card p-4 p-md-5 bg-white">
-                <div class="row align-items-center g-3">
-                    <div class="col-md-8">
-                        <h3 class="fw-bold mb-1">Ready to boost your chemistry score?</h3>
-                        <div class="text-muted">Choose a pack and get instant access after payment.</div>
-                    </div>
-                    <div class="col-md-4 text-md-end">
-                        <a href="shop.html" class="btn btn-warning btn-lg">Buy Now</a>
-                    </div>
-                </div>
-            </div>
         </section>
     </main>
 
     <div id="lcFooter"></div>
 
+    <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/data.js"></script>
     <script src="assets/js/main.js"></script>
     <script src="assets/js/nav-auth-toggle.js"></script>
     <script src="assets/js/cart.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', ()=>{
-        const grid = document.getElementById('featuredGrid');
-        const featured = (window.LC_PRODUCTS||[]).slice(0,3);
-        grid.innerHTML = featured.map(p=>`
-        <div class="col-md-4">
-        <div class="card note-card h-100">
-        <img class="note-thumb" src="assets/images/note-cover.svg" alt="cover" />
-        <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start">
-        <h5 class="mb-1">${p.title}</h5>
-        <span class="badge text-bg-warning">${p.badge||p.exam}</span>
-        </div>
-        <div class="text-muted small mb-2">${p.exam} • ${p.category}</div>
-        <p class="text-muted">${p.short}</p>
-        <div class="d-flex justify-content-between align-items-center mt-3">
-        <div class="price">${formatINR(p.price)}</div>
-        <a class="btn btn-primary btn-sm" href="product.html?id=${p.id}">View</a>
-        </div>
-        </div>
-        </div>
-        </div>
-        `).join('');
-        });
-    </script>
+
+    <!-- ✅ NEW BACKEND‑DRIVEN SCRIPT -->
+    <script src="assets/js/index.js"></script>
 </body>
 </html>

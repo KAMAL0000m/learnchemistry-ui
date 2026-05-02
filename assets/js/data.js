@@ -5,7 +5,7 @@ window.LC_PRODUCTS = [
   {
     "id": 1,
     "slug": "organic-chemistry-notes-neet",
-    "title": "Organic Chemistry Notes – NEET",
+    "title": "Kamalesh",
     "exam": "NEET",
     "category": "NEET",
     "price": 299,
@@ -27,7 +27,7 @@ window.LC_PRODUCTS = [
   {
     "id": 2,
     "slug": "physical-chemistry-formula-book",
-    "title": "Physical Chemistry Formula Book",
+    "title": "Physical sanjit",
     "exam": "JEE",
     "category": "JEE",
     "price": 199,
@@ -47,7 +47,7 @@ window.LC_PRODUCTS = [
   {
     "id": 3,
     "slug": "inorganic-chemistry-ncert-notes",
-    "title": "Inorganic Chemistry NCERT Notes",
+    "title": "Inorganic pratik",
     "exam": "NEET",
     "category": "Class 11/12",
     "price": 249,
@@ -67,7 +67,7 @@ window.LC_PRODUCTS = [
   {
     "id": 4,
     "slug": "class-12-organic-one-shot",
-    "title": "Class 12 Organic – One Shot",
+    "title": "Class sandip",
     "exam": "Class 11/12",
     "category": "Class 11/12",
     "price": 149,
