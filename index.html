@@ -37,7 +37,12 @@
                 <!-- ✅ POPULAR PACK (dynamic) -->
                 <div class="col-lg-5">
                     <div class="card note-card">
-                        <img src="assets/images/note-cover.svg" class="note-thumb" alt="cover" />
+                        <!-- ✅ No hardcoded .svg. JS will set src once it fetches from backend -->
+                        <img id="popularThumb"
+                             class="note-thumb"
+                             alt="cover"
+                             style="display:block; width:100%; height:auto;" />
+
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
@@ -47,6 +52,9 @@
                                 <div class="price" id="popularPrice">—</div>
                             </div>
                             <a id="popularLink" class="btn btn-primary w-100 mt-3">See Details</a>
+
+                            <!-- optional helper text -->
+                            <div id="popularHint" class="text-muted small mt-2"></div>
                         </div>
                     </div>
                 </div>
@@ -78,7 +86,7 @@
     <script src="assets/js/nav-auth-toggle.js"></script>
     <script src="assets/js/cart.js"></script>
 
-    <!-- ✅ NEW BACKEND‑DRIVEN SCRIPT -->
+    <!-- ✅ BACKEND‑DRIVEN SCRIPT -->
     <script src="assets/js/index.js"></script>
 </body>
 </html>

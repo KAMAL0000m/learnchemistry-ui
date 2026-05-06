@@ -7,6 +7,7 @@
         document.documentElement.style.visibility = "hidden";
 
         function getRoleFromToken(token) {
+        // token format: uid:role:exp.signatureHex
         if (!token) return null;
         const dot = token.indexOf(".");
         const payload = dot >= 0 ? token.substring(0, dot) : token;
@@ -28,6 +29,7 @@
         document.documentElement.style.visibility = "visible";
         })();
     </script>
+
     <title>Admin — LearnChemistry.in</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -44,10 +46,10 @@
         <h1 class="h3 fw-bold mb-3">Admin Panel</h1>
 
         <div class="row g-4">
-            <!-- Create Course + Upload PDF -->
+            <!-- Create Course + Upload PDF + Thumbnail -->
             <section class="col-lg-5">
                 <div class="card note-card p-4">
-                    <h5 class="mb-3">Upload PDF / Add Product</h5>
+                    <h5 class="mb-3">Upload PDF + Thumbnail / Add Product</h5>
 
                     <div id="adminMsg"></div>
 
@@ -56,6 +58,12 @@
                             <label class="form-label">PDF file</label>
                             <input id="adminPdfFile" type="file" class="form-control" accept="application/pdf" />
                             <div class="text-muted small mt-1">PDF stored securely on backend.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Thumbnail image</label>
+                            <input id="adminThumbFile" type="file" class="form-control" accept="image/*" />
+                            <div class="text-muted small mt-1">PNG/JPG/WebP recommended (max ~5MB).</div>
                         </div>
 
                         <div class="mb-3">
@@ -75,6 +83,7 @@
                         <div class="mb-3">
                             <label class="form-label">Price (INR)</label>
                             <input id="adminPrice" type="number" min="0" class="form-control" placeholder="299" />
+                            <div class="text-muted small mt-1">Stored as paise in DB.</div>
                         </div>
 
                         <div class="mb-3">
@@ -82,14 +91,15 @@
                             <textarea id="adminDesc" class="form-control" rows="3"></textarea>
                         </div>
 
-                        <button class="btn btn-primary" type="submit">
-                            <i class="bi bi-cloud-upload"></i> Create Course + Upload PDF
+                        <button class="btn btn-primary" type="submit" id="btnAdminSubmit">
+                            <i class="bi bi-cloud-upload"></i> Create Course + Upload PDF + Thumbnail
                         </button>
 
                         <div class="text-muted small mt-2">
                             Backend:
                             <code>POST /v1/admin/courses</code>,
-                            <code>POST /v1/admin/course-pdf/:id</code>
+                            <code>POST /v1/admin/course-pdf/:id</code>,
+                            <code>POST /v1/admin/course-thumb/:id</code>
                         </div>
                     </form>
                 </div>
